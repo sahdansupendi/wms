@@ -26,7 +26,7 @@ public class LoginService {
         }
 
         if (user.getStatus() != null && user.getStatus() == 0) {
-            throw new AuthenticationFailedException("User tidak aktif");
+            throw new AuthenticationFailedException("User tidak aktiff");
         }
 
         return user;
