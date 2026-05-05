@@ -1,8 +1,8 @@
-package com.example.wms.dto.login;
+package com.example.wms.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record LoginRequest(
+public record AuthRequest(
         @NotBlank
         String username,
         @NotBlank

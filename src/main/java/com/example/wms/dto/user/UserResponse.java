@@ -4,7 +4,6 @@ import com.example.wms.entity.Users;
 import com.example.wms.enumz.UserRoleType;
 
 public record UserResponse(
-        String userid,
         String username,
         String email,
         String rolename
@@ -18,7 +17,6 @@ public record UserResponse(
                 .orElse("UNKNOWN");
 
         return new UserResponse(
-                users.getUserid(),
                 users.getUsername(),
                 users.getEmail(),
                 roleName

@@ -6,10 +6,9 @@ import com.example.wms.dto.user.UserRequest;
 import com.example.wms.dto.user.UserResponse;
 import com.example.wms.dto.user.UserUpdateRequest;
 import com.example.wms.entity.Users;
-import com.example.wms.exception.AuthenticationFailedException;
 import com.example.wms.exception.ResourceNotFoundException;
 import com.example.wms.service.UserService;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,7 +27,7 @@ public class UserController {
 
     @PostMapping("/registeruser")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> registerUser(@RequestBody @Valid UserRequest request, HttpSession session) throws ResourceNotFoundException {
+    public ResponseEntity<ApiResponse> registerUser(@RequestBody @Valid UserRequest request) throws ResourceNotFoundException {
         Users users = userService.register(request);
         return ResponseEntity.ok(ApiResponse.success("Register User Successfully",UserResponse.fromUser(users)));
     }
@@ -53,8 +52,9 @@ public class UserController {
 
     }
 
-    @GetMapping("/getbyid")
-    public ResponseEntity<ApiResponse<UserResponse>> getUserById(@RequestParam("userid") String userid) {
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponse>> getUserById(HttpServletRequest request) {
+        String userid = request.getAttribute("userid").toString();
         Users users = userService.getByUserId(userid);
         return ResponseEntity.ok(ApiResponse.success(UserResponse.fromUser(users)));
     }

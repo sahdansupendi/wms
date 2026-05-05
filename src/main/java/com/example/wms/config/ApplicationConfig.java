@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;*/
 @Configuration
 public class ApplicationConfig implements WebMvcConfigurer {
 
+    //Configuration session
     @Autowired
     private SessionInterceptor sessionInterceptor;
 
@@ -22,7 +23,7 @@ public class ApplicationConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/api/auth/login");
     }
 
-    /*@Bean
+   /* @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }*/
