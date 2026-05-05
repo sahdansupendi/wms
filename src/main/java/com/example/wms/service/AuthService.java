@@ -4,6 +4,7 @@ import com.example.wms.dto.auth.AuthRequest;
 import com.example.wms.dto.auth.AuthResponse;
 import com.example.wms.entity.Users;
 import com.example.wms.exception.AuthenticationFailedException;
+import com.example.wms.exception.AuthenticationFailedExceptionJWT;
 import com.example.wms.exception.ResourceNotFoundException;
 import com.example.wms.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,16 +49,16 @@ public class AuthService {
 
         // Cek token valid
         if (!jwtService.isTokenValid(refreshToken)) {
-            throw new AuthenticationFailedException("Refresh token expired, silakan login kembali");
+            throw new AuthenticationFailedExceptionJWT("Refresh token expired, silakan login kembali");
         }
 
         // Cek tidak di-blacklist
         if (tokenBlacklistService.isBlacklisted(refreshToken)) {
-            throw new AuthenticationFailedException("Refresh token sudah tidak aktif");
+            throw new AuthenticationFailedExceptionJWT("Refresh token sudah tidak aktif");
         }
 
         if (!"refresh".equals(tokenType)) {
-            throw new AuthenticationFailedException("Gunakan refresh token, bukan access token");
+            throw new AuthenticationFailedExceptionJWT("Gunakan refresh token, bukan access token");
         }
 
         String username = jwtService.extractUsername(refreshToken);

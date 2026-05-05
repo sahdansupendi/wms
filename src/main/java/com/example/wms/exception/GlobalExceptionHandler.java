@@ -2,8 +2,10 @@ package com.example.wms.exception;
 
 
 import com.example.wms.dto.ErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -14,7 +16,9 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @ControllerAdvice
@@ -130,6 +134,30 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getDescription(false).replace("uri=", "")
         );
+    }
+
+    // 🔐 Authentication Error
+    @ExceptionHandler(AuthenticationFailedExceptionJWT.class)
+    public ResponseEntity<Object> handleAuthenticationFailedJWT(
+            AuthenticationFailedExceptionJWT ex,
+            HttpServletRequest request) {
+
+        return writeErrorResponseJWT(HttpStatus.UNAUTHORIZED, ex.getMessage(), request);
+    }
+
+    private ResponseEntity<Object> writeErrorResponseJWT(
+            HttpStatus status,
+            String message,
+            HttpServletRequest request) {
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        body.put("message", message);
+        body.put("timestamp", LocalDateTime.now().toString());
+        body.put("path", request.getRequestURI());
+
+        return new ResponseEntity<>(body, status);
     }
 
     /*@ExceptionHandler(BadCredentialsException.class)

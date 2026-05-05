@@ -1,6 +1,7 @@
 package com.example.wms.security;
 
 import com.example.wms.exception.AuthenticationFailedException;
+import com.example.wms.exception.AuthenticationFailedExceptionJWT;
 import com.example.wms.service.JwtService;
 import com.example.wms.service.TokenBlacklistService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -28,6 +30,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private TokenBlacklistService tokenBlacklistService;
 
+    @Autowired
+    private HandlerExceptionResolver handlerExceptionResolver;
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
@@ -41,7 +46,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
         try {
-
             String authHeader = request.getHeader("Authorization");
 
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -52,22 +56,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
             if (!jwtService.isTokenValid(token)) {
-                throw new AuthenticationFailedException("Token expired atau tidak valid");
+                throw new AuthenticationFailedExceptionJWT("Token expired atau tidak valid");
             }
 
-            if (!jwtService.isTokenValid(token)) {
-                throw new AuthenticationFailedException("Token expired atau tidak valid");
-            }
 
             // Cek apakah token sudah di-blacklist (sudah logout)
             if (tokenBlacklistService.isBlacklisted(token)) {
-                throw new AuthenticationFailedException("Token sudah tidak aktif, silakan login kembali");
+                throw new AuthenticationFailedExceptionJWT("Token sudah tidak aktif, silakan login kembali");
             }
 
             String tokenType = jwtService.extractTokenType(token);
 
             if (!"access".equals(tokenType)) {
-                throw new AuthenticationFailedException("Gunakan access token, bukan refresh token");
+                throw new AuthenticationFailedExceptionJWT("Gunakan access token, bukan refresh token");
             }
 
             //ambil data dari token
@@ -85,25 +86,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
 
-        }catch (AuthenticationFailedException e) {
-            writeErrorResponse(request,response,e.getMessage());
-        }catch (Exception e){
-            writeErrorResponse(request,response,"Terjadi kesalahan autentikasi");
+
+        }catch (Exception e) {
+            handlerExceptionResolver.resolveException(request, response, null, e);
         }
-    }
-
-    private void writeErrorResponse(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    String message) throws IOException {
-        Map<String,Object> body = new LinkedHashMap<>();
-        body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-        body.put("error", "Unauthorized");
-        body.put("message", message);
-        body.put("timestamp", LocalDateTime.now().toString());
-        body.put("path", request.getRequestURI());
-
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-        new ObjectMapper().writeValue(response.getWriter(), body);
     }
 }
