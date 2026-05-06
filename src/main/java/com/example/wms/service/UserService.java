@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -22,7 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-//    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public Users register(UserRequest request) {
         // validasi jika email sudah ada
@@ -46,7 +47,7 @@ public class UserService {
                 .userid(maxUserId)
                 .username(request.username())
                 .email(request.email())
-                .password(DigestUtils.md5DigestAsHex((maxUserId + request.password()).getBytes()))
+                .password(passwordEncoder.encode(maxUserId + request.password()))
                 .roleid(request.roleid())
                 .status(1)
                 .build();

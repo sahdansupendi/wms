@@ -1,15 +1,21 @@
 package com.example.wms.security;
 
+import com.example.wms.dto.JwtErrorResponseWriter;
 import com.example.wms.exception.AuthenticationFailedException;
 import com.example.wms.exception.AuthenticationFailedExceptionJWT;
 import com.example.wms.service.JwtService;
 import com.example.wms.service.TokenBlacklistService;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +23,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,13 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private TokenBlacklistService tokenBlacklistService;
 
     @Autowired
-    private HandlerExceptionResolver handlerExceptionResolver;
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        return path.equals("/api/auth/login") || path.equals("/api/auth/blacklist") || path.equals("/api/auth/refresh");
-    }
+    private JwtErrorResponseWriter errorResponseWriter;
 
 
     @Override
@@ -45,12 +46,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-        try {
-            String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader("Authorization");
+        request.setAttribute("originalPath", request.getRequestURI());
 
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                throw new AuthenticationFailedException("Token tidak valid / belum login");
-            }
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
 
             String token = authHeader.substring(7);
 
@@ -84,11 +88,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             request.setAttribute("expiredAt", expiedAt);
             request.setAttribute("tokenType", tokenType);
 
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(username,null,new ArrayList<>());
+
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
             filterChain.doFilter(request, response);
 
 
-        }catch (Exception e) {
-            handlerExceptionResolver.resolveException(request, response, null, e);
+        }catch (AuthenticationFailedExceptionJWT e) {
+            errorResponseWriter.writeUnauthorized(response,request.getRequestURI(),e.getMessage());
         }
     }
 }

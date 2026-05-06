@@ -10,6 +10,7 @@ import com.example.wms.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -21,6 +22,8 @@ public class AuthService {
 
     private final UserRepository userRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
     private TokenBlacklistService tokenBlacklistService;
 
@@ -31,9 +34,9 @@ public class AuthService {
         Users user = userRepository.findByUsername(authRequest.username())
                 .orElseThrow(() -> new ResourceNotFoundException("Username " + authRequest.username() + " tidak ditemukan"));
         String userid = user.getUserid();
-        String pwd = DigestUtils.md5DigestAsHex((userid + authRequest.password()).getBytes());
+        String pwd = passwordEncoder.encode(userid + authRequest.password());
 
-        if (!user.getPassword().equals(pwd)) {
+        if (passwordEncoder.matches(user.getPassword(), pwd)){
             throw new AuthenticationFailedException("Password atau Username salah");
         }
 
