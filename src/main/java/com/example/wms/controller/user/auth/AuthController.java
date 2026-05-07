@@ -24,7 +24,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final TokenBlacklistService tokenBlacklistService;
 
-    @PutMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody AuthRequest authRequest, HttpServletRequest request) {
         Users user = authService.login(authRequest);
 

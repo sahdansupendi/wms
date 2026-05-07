@@ -34,9 +34,9 @@ public class AuthService {
         Users user = userRepository.findByUsername(authRequest.username())
                 .orElseThrow(() -> new ResourceNotFoundException("Username " + authRequest.username() + " tidak ditemukan"));
         String userid = user.getUserid();
-        String pwd = passwordEncoder.encode(userid + authRequest.password());
+        String pwd = userid + authRequest.password();
 
-        if (passwordEncoder.matches(user.getPassword(), pwd)){
+        if (!passwordEncoder.matches(pwd, user.getPassword())) {
             throw new AuthenticationFailedException("Password atau Username salah");
         }
 

@@ -136,7 +136,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 🔐 Authentication Error
+    // Authentication Error
     @ExceptionHandler(AuthenticationFailedExceptionJWT.class)
     public ResponseEntity<Object> handleAuthenticationFailedJWT(
             AuthenticationFailedExceptionJWT ex,

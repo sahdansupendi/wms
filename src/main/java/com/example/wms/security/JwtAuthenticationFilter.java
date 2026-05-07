@@ -40,6 +40,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtErrorResponseWriter errorResponseWriter;
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.equals("/api/auth/login") || path.equals("/api/auth/blacklist") || path.equals("/api/auth/refresh");
+    }
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
