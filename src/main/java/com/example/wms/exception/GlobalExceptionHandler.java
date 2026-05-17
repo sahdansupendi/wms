@@ -81,7 +81,7 @@ public class GlobalExceptionHandler {
                 "Validation Error",
                 ex.getMessage(),
                 request.getDescription(false).replace("uri=", "")
-        ).withDetails(Map.of("errors", ex.getValidationErrors()));
+        ).withDetails(ex.getValidationErrors());
     }
 
     @ExceptionHandler(DataAccessException.class)

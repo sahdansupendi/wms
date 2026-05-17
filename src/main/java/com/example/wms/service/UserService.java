@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
 import java.util.Map;
@@ -26,14 +27,16 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public Users register(UserRequest request) {
+        // validasi jika username sudah ada
+        if (userRepository.findByUsername(request.username()).isPresent()){
+            throw new ValidationException("Username already exists" , Map.of("username", "Username must be unique"));
+        }
+
         // validasi jika email sudah ada
         if (userRepository.findByEmail(request.email()).isPresent()){
             throw new ValidationException("Email already exists" , Map.of("email", "Email must be unique"));
         }
 
-        if (userRepository.findByUsername(request.username()).isPresent()){
-            throw new ValidationException("Username already exists" , Map.of("username", "Username must be unique"));
-        }
 
         // Pengecekan roleid apakah ada di enum
         UserRoleType.fromRoleId(request.roleid())
@@ -59,19 +62,19 @@ public class UserService {
         Users user = userRepository.findByUserid(userid)
                 .orElseThrow(() -> new ResourceNotFoundException("Userid " + userid + " tidak ditemukan"));
 
-        // validasi untuk email jika sudah digunakan
-        if (request.email() != null){
-            boolean emailExist = userRepository.existsByEmailAndUseridNot(request.email(),userid);
-            if (emailExist){
-                throw new ValidationException("Email already exists" , Map.of("email", "Email must be unique"));
-            }
-        }
-
         // validasi untuk username jika sudah digunakan
         if (request.username() != null){
             boolean usernameExist = userRepository.existsByUsernameAndUseridNot(request.username(), userid);
             if (usernameExist){
                 throw new ValidationException("Username already exists" , Map.of("username", "Username must be unique"));
+            }
+        }
+
+        // validasi untuk email jika sudah digunakan
+        if (request.email() != null){
+            boolean emailExist = userRepository.existsByEmailAndUseridNot(request.email(),userid);
+            if (emailExist){
+                throw new ValidationException("Email already exists" , Map.of("email", "Email must be unique"));
             }
         }
 

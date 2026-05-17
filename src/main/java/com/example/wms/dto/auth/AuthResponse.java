@@ -6,6 +6,7 @@ import com.example.wms.enumz.UserRoleType;
 import java.util.Date;
 
 public record AuthResponse(
+        String userid,
         String username,
         String rolename,
         String token,
@@ -18,6 +19,7 @@ public record AuthResponse(
                 .orElse("UNKNOWN");
 
         return new AuthResponse(
+                users.getUserid(),
                 users.getUsername(),
                 roleName,
                 token,

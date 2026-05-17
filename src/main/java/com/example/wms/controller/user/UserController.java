@@ -28,14 +28,14 @@ public class UserController {
 
     @PostMapping("/registeruser")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<ApiResponse> registerUser(@RequestBody @Valid UserRequest request) throws ResourceNotFoundException {
+    public ResponseEntity<ApiResponse> registerUser(@Valid @RequestBody UserRequest request) throws ResourceNotFoundException {
         Users users = userService.register(request);
         return ResponseEntity.ok(ApiResponse.success("Register User Successfully",UserResponse.fromUser(users)));
     }
 
     @PutMapping("/updateuser")
     public ResponseEntity<ApiResponse<UserResponse>> userUpdate(
-            @RequestParam("userid") String userid, @RequestBody @Valid UserUpdateRequest request) {
+            @RequestParam("userid") String userid,@Valid  @RequestBody  UserUpdateRequest request) {
         Users users = userService.updateUser(request,userid);
         return ResponseEntity.ok(ApiResponse.success("Update User Successfully",UserResponse.fromUser(users)));
 
