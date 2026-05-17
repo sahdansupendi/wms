@@ -12,6 +12,8 @@ public interface UserRepository extends JpaRepository<Users, Long> {
     @Query("SELECT coalesce(lpad(cast(max(cast(userid as integer)) + 1 as string ),8,'0'),'00000001') as maxid FROM Users")
     String getMaxId();
 
+    Integer countBy();
+
     Optional<Users> findByUserid(String userId);
 
     Optional<Users> findByUsername(String username);

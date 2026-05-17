@@ -7,6 +7,7 @@ import com.example.wms.dto.user.UserResponse;
 import com.example.wms.dto.user.UserUpdateRequest;
 import com.example.wms.entity.Users;
 import com.example.wms.exception.ResourceNotFoundException;
+import com.example.wms.repository.UserRepository;
 import com.example.wms.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -64,5 +65,11 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponse>> getUserByUsername(@RequestParam("username") String username) {
         Users users = userService.getByUsername(username);
         return ResponseEntity.ok(ApiResponse.success(UserResponse.fromUser(users)));
+    }
+
+    @GetMapping("/countusers")
+    public ResponseEntity<ApiResponse<Integer>> getCountUsers(HttpServletRequest request) {
+        Integer userCount = userService.countUsers();
+        return ResponseEntity.ok(ApiResponse.success(userCount));
     }
 }

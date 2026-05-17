@@ -109,4 +109,8 @@ public class UserService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Username " + username + " tidak ditemukan"));
     }
+
+    public Integer countUsers(){
+        return userRepository.countBy();
+    }
 }

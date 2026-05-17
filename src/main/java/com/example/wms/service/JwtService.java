@@ -27,7 +27,8 @@ public class JwtService {
                 .claim("role",roleName)
                 .claim("type","access")
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 1))
+                /*.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 1))*/
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 1))
                 .signWith(Keys.hmacShaKeyFor(secretkey.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -43,7 +44,7 @@ public class JwtService {
                 .claim("role",roleName)
                 .claim("type","refresh")
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 1))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7))
                 .signWith(Keys.hmacShaKeyFor(secretkey.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }
