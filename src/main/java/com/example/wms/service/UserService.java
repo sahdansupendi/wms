@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -25,6 +27,7 @@ import java.util.Map;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public Users register(UserRequest request) {
         // validasi jika username sudah ada
@@ -46,6 +49,9 @@ public class UserService {
         //Generate Userid
         String maxUserId = userRepository.getMaxId();
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
         Users user = Users.builder()
                 .userid(maxUserId)
                 .username(request.username())
@@ -53,12 +59,16 @@ public class UserService {
                 .password(passwordEncoder.encode(maxUserId + request.password()))
                 .roleid(request.roleid())
                 .status(1)
+                .createuser(username)
                 .build();
 
         return userRepository.save(user);
     }
 
-    public Users updateUser(UserUpdateRequest request, String userid){
+    public Users updateUser(UserUpdateRequest request){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String userid =(String) auth.getDetails();
+
         Users user = userRepository.findByUserid(userid)
                 .orElseThrow(() -> new ResourceNotFoundException("Userid " + userid + " tidak ditemukan"));
 
@@ -85,9 +95,12 @@ public class UserService {
                             new ResourceNotFoundException("Roleid " + request.roleid() + " tidak ditemukan"));
         }
 
+        String username = auth.getName();
+
         user.setEmail(request.email());
         user.setUsername(request.username());
         user.setRoleid(request.roleid());
+        user.setUpdateuser(username);
 
         return userRepository.save(user);
     }
@@ -101,13 +114,19 @@ public class UserService {
         return users;
     }
 
-    public Users getByUserId (String userid) {
+    public Users getByUserId () {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String userid =(String) auth.getDetails();
+
         return userRepository.findByUserid(userid)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("User ID " + userid + " tidak ditemukan"));
     }
 
-    public Users getByUsername (String username) {
+    public Users getByUsername () {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
         return userRepository.findByUsername(username.trim().toLowerCase())
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Username " + username + " tidak ditemukan"));

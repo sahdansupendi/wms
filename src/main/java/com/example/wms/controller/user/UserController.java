@@ -35,8 +35,8 @@ public class UserController {
 
     @PutMapping("/updateuser")
     public ResponseEntity<ApiResponse<UserResponse>> userUpdate(
-            @RequestParam("userid") String userid,@Valid  @RequestBody  UserUpdateRequest request) {
-        Users users = userService.updateUser(request,userid);
+            @Valid  @RequestBody UserUpdateRequest request, HttpServletRequest userid) {
+        Users users = userService.updateUser(request);
         return ResponseEntity.ok(ApiResponse.success("Update User Successfully",UserResponse.fromUser(users)));
 
     }
@@ -54,21 +54,20 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserResponse>> getUserById(HttpServletRequest request) {
-        String userid = request.getAttribute("userid").toString();
-        Users users = userService.getByUserId(userid);
+    public ResponseEntity<ApiResponse<UserResponse>> getUserById() {
+        Users users = userService.getByUserId();
         return ResponseEntity.ok(ApiResponse.success(UserResponse.fromUser(users)));
     }
 
 
     @GetMapping("/getbyusername")
-    public ResponseEntity<ApiResponse<UserResponse>> getUserByUsername(@RequestParam("username") String username) {
-        Users users = userService.getByUsername(username);
+    public ResponseEntity<ApiResponse<UserResponse>> getUserByUsername() {
+        Users users = userService.getByUsername();
         return ResponseEntity.ok(ApiResponse.success(UserResponse.fromUser(users)));
     }
 
     @GetMapping("/countusers")
-    public ResponseEntity<ApiResponse<Integer>> getCountUsers(HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<Integer>> getCountUsers() {
         Integer userCount = userService.countUsers();
         return ResponseEntity.ok(ApiResponse.success(userCount));
     }

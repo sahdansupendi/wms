@@ -6,9 +6,9 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public enum UserRoleType {
-    ROLE_SUPERUSER("00"),
-    ROLE_ADMIN("01"),
-    ROLE_USER("02");
+    SUPERUSER("00"),
+    ADMIN("01"),
+    USER("02");
 
     private final String roleId;
 
