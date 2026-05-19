@@ -3,6 +3,7 @@ package com.amz.wms.service;
 
 import com.amz.wms.dto.user.UserRequest;
 import com.amz.wms.dto.user.UserUpdateRequest;
+import com.amz.wms.entity.Products;
 import com.amz.wms.entity.Users;
 import com.amz.wms.enumz.UserRoleType;
 import com.amz.wms.exception.ResourceNotFoundException;
@@ -127,5 +128,14 @@ public class UserService {
 
     public Integer countUsers(){
         return userRepository.countBy();
+    }
+
+    public Users deleteByUserId (String userid) {
+        Users users = userRepository.findByUserid(userid)
+                .orElseThrow(() -> new ResourceNotFoundException("User ID " + userid + " tidak ditemukan"));
+
+        userRepository.delete(users);
+
+        return users;
     }
 }

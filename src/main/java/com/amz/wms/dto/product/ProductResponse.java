@@ -12,7 +12,7 @@ public record ProductResponse(
         String unitOfMeasure,
         BigDecimal weight
 ) {
-    public static ProductResponse fromProduct(Products products){
+    public static ProductResponse fromUser(Products products){
 
         return new ProductResponse(
                 products.getProdid(),

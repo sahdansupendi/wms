@@ -70,4 +70,10 @@ public class UserController {
         Integer userCount = userService.countUsers();
         return ResponseEntity.ok(ApiResponse.success(userCount));
     }
+
+    @DeleteMapping("/{userid}")
+    public ResponseEntity<ApiResponse> deleteUserId(@PathVariable String userid) {
+        userService.deleteByUserId(userid);
+        return ResponseEntity.ok(ApiResponse.success("Delete User success"));
+    }
 }
