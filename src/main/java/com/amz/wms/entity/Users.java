@@ -3,6 +3,7 @@ package com.amz.wms.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +26,9 @@ public class Users {
     private String userid;
 
     @Email(message = "Email must be valid")
+    @Pattern(
+            regexp = "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+            ,message = "Format email tidak valid")
     @Column(unique = true)
     private String email;
     @NotBlank(message = "Password cannot be blank")
