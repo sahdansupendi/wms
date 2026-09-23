@@ -230,8 +230,8 @@ pipeline {
             echo "PIPELINE GAGAL! Branch: ${env.BRANCH_NAME}, Build: #${env.BUILD_NUMBER}"
         }
         always {
-            // Bersihkan workspace setelah build
-            cleanWs()
+            // Bersihkan workspace setelah build (pakai deleteDir yang built-in)
+            deleteDir()
         }
     }
 }
