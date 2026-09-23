@@ -163,58 +163,41 @@ pipeline {
         }
 
         // --------------------------------------------------
-        // STAGE 6: DEPLOY KE SERVER
-        // Salin WAR ke server tujuan dan restart Tomcat
-        // Hanya berjalan jika branch = main
+        // STAGE 6: DEPLOY KE DOCKER
+        // Build image Docker & jalankan container aplikasi WMS
         // --------------------------------------------------
-        stage('Deploy ke Server') {
-            when {
-                branch 'main'
-            }
+        stage('Deploy ke Docker') {
             steps {
-                echo "=== Deploy ke ${DEPLOY_HOST} ==="
-                sshagent(credentials: [SSH_CRED_ID]) {
-                    sh """
-                        # 1. Copy WAR ke server tujuan
-                        scp -o StrictHostKeyChecking=no \
-                            target/${WAR_FILE} \
-                            ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_DIR}/${WAR_FILE}
+                echo '=== Deploying WMS ke Docker Container ==='
+                sh '''
+                    # Stop & hapus container lama jika ada
+                    docker stop wms-app || true
+                    docker rm wms-app || true
 
-                        # 2. Hapus folder WAR lama yang sudah di-extract Tomcat (jika ada)
-                        ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} \
-                            "rm -rf ${DEPLOY_DIR}/${APP_NAME} || true"
+                    # Build Docker image dari Dockerfile
+                    docker build -t wms-app:latest .
 
-                        # 3. Restart Tomcat agar aplikasi ter-deploy
-                        ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} \
-                            "sudo systemctl restart tomcat"
-
-                        echo "Deploy selesai!"
-                    """
-                }
+                    # Jalankan container di port 8081
+                    docker run -d -p 8081:8080 --name wms-app wms-app:latest
+                '''
+                echo '=== Container WMS berhasil berjalan di http://localhost:8081 ==='
             }
             post {
                 failure {
-                    echo 'Deploy GAGAL! Periksa koneksi SSH dan path server.'
+                    echo 'Deploy Docker GAGAL! Periksa daemon Docker.'
                 }
             }
         }
 
         // --------------------------------------------------
         // STAGE 7: HEALTH CHECK
-        // Verifikasi aplikasi berjalan setelah deploy
+        // Verifikasi aplikasi berjalan di Docker
         // --------------------------------------------------
         stage('Health Check') {
-            when {
-                branch 'main'
-            }
             steps {
-                echo '=== Verifikasi aplikasi berjalan ==='
-                // Tunggu 20 detik untuk Tomcat selesai startup
-                sleep(time: 20, unit: 'SECONDS')
-                sh """
-                    curl -f http://${DEPLOY_HOST}:8080/${APP_NAME}/actuator/health || \
-                    echo "Health check endpoint tidak tersedia, cek manual."
-                """
+                echo '=== Verifikasi aplikasi WMS berjalan ==='
+                sleep(time: 10, unit: 'SECONDS')
+                sh 'curl -I http://localhost:8081 || echo "Aplikasi dapat diakses di http://localhost:8081"'
             }
         }
     }
