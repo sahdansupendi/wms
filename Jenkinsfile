@@ -40,8 +40,6 @@ pipeline {
         timeout(time: 30, unit: 'MINUTES')
         // Tidak mengizinkan build berjalan bersamaan di branch yang sama
         disableConcurrentBuilds()
-        // Tambahkan timestamp di setiap log
-        timestamps()
     }
 
     // ======================================================
