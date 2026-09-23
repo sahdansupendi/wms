@@ -177,8 +177,12 @@ pipeline {
                     # Build Docker image dari Dockerfile
                     docker build -t wms-app:latest .
 
-                    # Jalankan container di port 8081
-                    docker run -d -p 8081:8080 --name wms-app wms-app:latest
+                    # Jalankan container di port 8081 dengan koneksi database ke host.docker.internal
+                    docker run -d \
+                      -p 8081:8080 \
+                      --add-host=host.docker.internal:host-gateway \
+                      -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/db_wms \
+                      --name wms-app wms-app:latest
                 '''
                 echo '=== Container WMS berhasil berjalan di http://localhost:8081 ==='
             }
