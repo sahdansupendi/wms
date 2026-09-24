@@ -21,6 +21,7 @@ import java.util.Map;
 public class ProductCategoriesService {
     private final ProductCategoriesRepository productCategoriesRepository;
     private final ProductRepository productRepository;
+    private final AuditTrailService auditTrailService;
 
     public ProductCategories registerProdCat(ProductCategoriesRequest request) {
         //validasi jika pcid sudah ada
@@ -38,13 +39,26 @@ public class ProductCategoriesService {
                 .createuser(username)
                 .build();
 
-        return productCategoriesRepository.save(productCategories);
+        ProductCategories saved = productCategoriesRepository.save(productCategories);
+
+        auditTrailService.logCreate("ProductCategories", saved.getPcid(), saved, "Registered product category: " + saved.getName());
+
+        return saved;
     }
 
     public ProductCategories updateProdCat(ProductCategoriesRequest request) {
         // Cek pcid
         ProductCategories productCategories = productCategoriesRepository.findByPcid(request.pcid())
                 .orElseThrow(() -> new ResourceNotFoundException("Product Categories " + request.pcid() + " tidak ditemukan"));
+
+        // Snapshot nilai lama
+        ProductCategories oldCat = ProductCategories.builder()
+                .pcid(productCategories.getPcid())
+                .name(productCategories.getName())
+                .description(productCategories.getDescription())
+                .createuser(productCategories.getCreateuser())
+                .createdate(productCategories.getCreatedate())
+                .build();
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
@@ -54,7 +68,11 @@ public class ProductCategoriesService {
         productCategories.setDescription(request.description());
         productCategories.setUpdateuser(username);
 
-        return productCategoriesRepository.save(productCategories);
+        ProductCategories saved = productCategoriesRepository.save(productCategories);
+
+        auditTrailService.logUpdate("ProductCategories", saved.getPcid(), oldCat, saved, "Updated product category: " + saved.getName());
+
+        return saved;
 
     }
 
@@ -78,6 +96,8 @@ public class ProductCategoriesService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product Categories " + pcid + " tidak ditemukan"));
 
         productCategoriesRepository.delete(productCategories);
+
+        auditTrailService.logDelete("ProductCategories", pcid, productCategories, "Deleted product category ID: " + pcid + " (" + productCategories.getName() + ")");
 
         return productCategories;
     }

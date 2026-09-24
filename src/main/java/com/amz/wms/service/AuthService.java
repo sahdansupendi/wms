@@ -23,26 +23,33 @@ public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private TokenBlacklistService tokenBlacklistService;
-
-    @Autowired
-    JwtService jwtService;
+    private final TokenBlacklistService tokenBlacklistService;
+    private final JwtService jwtService;
+    private final AuditTrailService auditTrailService;
 
     public Users login(AuthRequest authRequest) {
         Users user = userRepository.findByUsername(authRequest.username())
-                .orElseThrow(() -> new ResourceNotFoundException("Username " + authRequest.username() + " tidak ditemukan"));
+                .orElse(null);
+
+        if (user == null) {
+            auditTrailService.logLogin(null, authRequest.username(), false, "Login gagal: Username " + authRequest.username() + " tidak ditemukan");
+            throw new ResourceNotFoundException("Username " + authRequest.username() + " tidak ditemukan");
+        }
+
         String userid = user.getUserid();
         String pwd = userid + authRequest.password();
 
         if (!passwordEncoder.matches(pwd, user.getPassword())) {
+            auditTrailService.logLogin(userid, user.getUsername(), false, "Login gagal: Password salah untuk username " + user.getUsername());
             throw new AuthenticationFailedException("Password atau Username salah");
         }
 
         if (user.getStatus() != null && user.getStatus() == 0) {
+            auditTrailService.logLogin(userid, user.getUsername(), false, "Login gagal: Status user " + user.getUsername() + " tidak aktif");
             throw new AuthenticationFailedException("User tidak aktif");
         }
 
+        auditTrailService.logLogin(userid, user.getUsername(), true, "User " + user.getUsername() + " berhasil login");
         return user;
     }
 
@@ -80,6 +87,16 @@ public class AuthService {
         String token = authHeader.substring(7);
         tokenBlacklistService.blacklist(token);
         tokenBlacklistService.blacklist(refreshToken);
+
+        String username = (String) request.getAttribute("username");
+        String userid = (String) request.getAttribute("userid");
+        if (username == null && token != null) {
+            try {
+                username = jwtService.extractUsername(token);
+                userid = jwtService.extractUserid(token);
+            } catch (Exception ignored) {}
+        }
+        auditTrailService.logLogout(userid, username != null ? username : "UNKNOWN");
     }
 
 }

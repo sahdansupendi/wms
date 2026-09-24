@@ -3,14 +3,12 @@ package com.amz.wms.service;
 
 import com.amz.wms.dto.user.UserRequest;
 import com.amz.wms.dto.user.UserUpdateRequest;
-import com.amz.wms.entity.Products;
 import com.amz.wms.entity.Users;
 import com.amz.wms.enumz.UserRoleType;
 import com.amz.wms.exception.ResourceNotFoundException;
 import com.amz.wms.exception.ValidationException;
 import com.amz.wms.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +23,7 @@ import java.util.Map;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditTrailService auditTrailService;
 
     public Users register(UserRequest request) {
         // validasi jika username sudah ada
@@ -59,7 +58,11 @@ public class UserService {
                 .createuser(username)
                 .build();
 
-        return userRepository.save(user);
+        Users savedUser = userRepository.save(user);
+
+        auditTrailService.logCreate("Users", savedUser.getUserid(), savedUser, "Registered user: " + savedUser.getUsername());
+
+        return savedUser;
     }
 
     public Users updateUser(UserUpdateRequest request){
@@ -68,6 +71,17 @@ public class UserService {
 
         Users user = userRepository.findByUserid(userid)
                 .orElseThrow(() -> new ResourceNotFoundException("Userid " + userid + " tidak ditemukan"));
+
+        // Snapshot nilai lama
+        Users oldUser = Users.builder()
+                .userid(user.getUserid())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .roleid(user.getRoleid())
+                .status(user.getStatus())
+                .createuser(user.getCreateuser())
+                .createdate(user.getCreatedate())
+                .build();
 
         // validasi untuk username jika sudah digunakan
         if (request.username() != null){
@@ -99,7 +113,11 @@ public class UserService {
         user.setRoleid(request.roleid());
         user.setUpdateuser(username);
 
-        return userRepository.save(user);
+        Users savedUser = userRepository.save(user);
+
+        auditTrailService.logUpdate("Users", savedUser.getUserid(), oldUser, savedUser, "Updated user: " + savedUser.getUsername());
+
+        return savedUser;
     }
 
     public List<Users> getAllUsers() {
@@ -135,6 +153,8 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User ID " + userid + " tidak ditemukan"));
 
         userRepository.delete(users);
+
+        auditTrailService.logDelete("Users", userid, users, "Deleted user ID: " + userid + " (" + users.getUsername() + ")");
 
         return users;
     }

@@ -22,6 +22,7 @@ import java.util.Map;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductCategoriesRepository productCategoriesRepository;
+    private final AuditTrailService auditTrailService;
 
     public Products registerProduct(ProductRequest request){
         // validasi jika product name sudah ada
@@ -53,12 +54,29 @@ public class ProductService {
                 .createuser(username)
                 .build();
 
-        return productRepository.save(product);
+        Products savedProduct = productRepository.save(product);
+
+        auditTrailService.logCreate("Products", savedProduct.getProdid(), savedProduct, "Registered product: " + savedProduct.getProdName());
+
+        return savedProduct;
     }
 
     public Products updateProduct(String prodid, ProductRequest request){
         Products products = productRepository.findByProdid(prodid.trim())
                 .orElseThrow(() -> new ResourceNotFoundException("Product Id " + prodid + " tidak ditemukan"));
+
+        // Snapshot nilai lama
+        Products oldProduct = Products.builder()
+                .prodid(products.getProdid())
+                .pcid(products.getPcid())
+                .sku(products.getSku())
+                .prodName(products.getProdName())
+                .unitOfMeasure(products.getUnitOfMeasure())
+                .weight(products.getWeight())
+                .status(products.getStatus())
+                .createuser(products.getCreateuser())
+                .createdate(products.getCreatedate())
+                .build();
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
@@ -79,7 +97,11 @@ public class ProductService {
         products.setWeight(request.weight());
         products.setUpdateuser(username);
 
-        return productRepository.save(products);
+        Products savedProduct = productRepository.save(products);
+
+        auditTrailService.logUpdate("Products", savedProduct.getProdid(), oldProduct, savedProduct, "Updated product: " + savedProduct.getProdName());
+
+        return savedProduct;
 
     }
 
@@ -109,6 +131,8 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product Id " + prodid + " tidak ditemukan"));
 
         productRepository.delete(products);
+
+        auditTrailService.logDelete("Products", prodid, products, "Deleted product ID: " + prodid + " (" + products.getProdName() + ")");
 
         return products;
     }
