@@ -13,16 +13,6 @@ pipeline {
         // Nama file WAR hasil build
         WAR_FILE        = "${APP_NAME}-${APP_VERSION}.war"
 
-        // Direktori deploy di server tujuan (mis. Tomcat webapps)
-        DEPLOY_DIR      = '/opt/tomcat/webapps'
-        // User SSH untuk koneksi ke server tujuan
-        DEPLOY_USER     = 'ubuntu'
-        // Host server tujuan (ganti dengan IP/domain server)
-        DEPLOY_HOST     = '192.168.1.100'
-
-        // Credential ID yang sudah didaftarkan di Jenkins
-        // (SSH key untuk deploy ke server)
-        SSH_CRED_ID     = 'ssh-deploy-key'
 
         // Lokasi tools (sesuaikan dengan path di Jenkins agent)
         JAVA_HOME       = tool name: 'JDK-21', type: 'jdk'
