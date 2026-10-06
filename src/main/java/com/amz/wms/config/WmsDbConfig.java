@@ -28,16 +28,16 @@ import java.util.Map;
 public class WmsDbConfig {
 
     @Primary
-    @Bean(name = "primaryDataSource")
+    @Bean(name = "wmsDataSource")
     @ConfigurationProperties(prefix = "spring.datasource.wms")
-    public DataSource primaryDataSource() {
+    public DataSource wmsDataSource() {
         return DataSourceBuilder.create().build();
     }
 
     @Primary
     @Bean(name = "primaryEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(
-            @Qualifier("primaryDataSource") DataSource dataSource) {
+            @Qualifier("wmsDataSource") DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
         em.setPackagesToScan("com.amz.wms.entity");
