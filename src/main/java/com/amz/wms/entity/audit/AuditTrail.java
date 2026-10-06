@@ -1,4 +1,4 @@
-package com.amz.wms.entity;
+package com.amz.wms.entity.audit;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

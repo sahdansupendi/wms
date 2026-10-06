@@ -172,6 +172,7 @@ pipeline {
                       -p 8081:8080 \
                       --add-host=host.docker.internal:host-gateway \
                       -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/db_wms \
+                      -e SPRING_AUDIT_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/db_audit \
                       --name wms-app wms-app:latest
                 '''
                 echo '=== Container WMS berhasil berjalan di http://localhost:8081 ==='

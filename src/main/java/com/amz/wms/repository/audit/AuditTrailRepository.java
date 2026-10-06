@@ -1,6 +1,6 @@
-package com.amz.wms.repository;
+package com.amz.wms.repository.audit;
 
-import com.amz.wms.entity.AuditTrail;
+import com.amz.wms.entity.audit.AuditTrail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

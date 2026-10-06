@@ -1,4 +1,4 @@
-package com.amz.wms.repository;
+package com.amz.wms.repository.wms;
 
 import com.amz.wms.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,7 +1,6 @@
-package com.amz.wms.repository;
+package com.amz.wms.repository.wms;
 
 import com.amz.wms.entity.ProductCategories;
-import com.amz.wms.entity.Products;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

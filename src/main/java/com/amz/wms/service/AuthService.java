@@ -6,10 +6,9 @@ import com.amz.wms.entity.Users;
 import com.amz.wms.exception.AuthenticationFailedException;
 import com.amz.wms.exception.AuthenticationFailedExceptionJWT;
 import com.amz.wms.exception.ResourceNotFoundException;
-import com.amz.wms.repository.UserRepository;
+import com.amz.wms.repository.wms.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

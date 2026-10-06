@@ -1,6 +1,6 @@
 package com.amz.wms.dto.audit;
 
-import com.amz.wms.entity.AuditTrail;
+import com.amz.wms.entity.audit.AuditTrail;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -7,7 +7,7 @@ import com.amz.wms.entity.Users;
 import com.amz.wms.enumz.UserRoleType;
 import com.amz.wms.exception.ResourceNotFoundException;
 import com.amz.wms.exception.ValidationException;
-import com.amz.wms.repository.UserRepository;
+import com.amz.wms.repository.wms.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;

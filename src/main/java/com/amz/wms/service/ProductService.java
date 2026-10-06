@@ -1,13 +1,11 @@
 package com.amz.wms.service;
 
 import com.amz.wms.dto.product.ProductRequest;
-import com.amz.wms.entity.ProductCategories;
 import com.amz.wms.entity.Products;
-import com.amz.wms.entity.Users;
 import com.amz.wms.exception.ResourceNotFoundException;
 import com.amz.wms.exception.ValidationException;
-import com.amz.wms.repository.ProductCategoriesRepository;
-import com.amz.wms.repository.ProductRepository;
+import com.amz.wms.repository.wms.ProductCategoriesRepository;
+import com.amz.wms.repository.wms.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;

@@ -1,10 +1,10 @@
 package com.amz.wms.service;
 
 import com.amz.wms.dto.audit.AuditTrailResponse;
-import com.amz.wms.entity.AuditTrail;
+import com.amz.wms.entity.audit.AuditTrail;
 import com.amz.wms.entity.Users;
 import com.amz.wms.exception.ResourceNotFoundException;
-import com.amz.wms.repository.AuditTrailRepository;
+import com.amz.wms.repository.audit.AuditTrailRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -37,9 +37,9 @@ public class AuditTrailService {
             .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     /**
-     * Catat aktivitas audit trail secara independen (Propagation.REQUIRES_NEW)
+     * Catat aktivitas audit trail secara independen di db_audit (auditTransactionManager)
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(transactionManager = "auditTransactionManager", propagation = Propagation.REQUIRES_NEW)
     public AuditTrail log(String action,
                           String entityName,
                           String entityId,
